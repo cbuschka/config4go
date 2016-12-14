@@ -47,113 +47,150 @@ type ConfigParser struct {
 	state       int
 	keyBuffer   bytes.Buffer
 	valueBuffer bytes.Buffer
+	dest        map[string]string
+}
+
+func (configParser *ConfigParser) reset() {
+	configParser.dest = make(map[string]string)
+	configParser.state = initial
 }
 
 // Parse reads a config from reader in into map dest. Returns error
 // in case of error.
 func (configParser *ConfigParser) Parse(in *bufio.Reader) (map[string]string, error) {
-	dest := make(map[string]string)
-
-	configParser.state = initial
+	configParser.reset()
 
 	for configParser.state != done {
-		rune, _, err := in.ReadRune()
+		symbol, _, err := in.ReadRune()
 		if err != nil && err != io.EOF {
 			return nil, err
 		}
 
-		switch configParser.state {
-		case initial:
-			if err == io.EOF {
-				configParser.state = done
-			} else if '#' == rune {
-				configParser.state = inComment
-			} else if unicode.IsSpace(rune) {
-				// skip
-			} else if unicode.IsLetter(rune) || '_' == rune {
-				configParser.keyBuffer.WriteRune(rune)
-				configParser.state = inKey
-			} else {
-				return nil, errors.New("Invalid input.")
-			}
-			break
-		case inKey:
-			if err == io.EOF {
-				return nil, errors.New("Unexpected end of input.")
-			} else if unicode.IsSpace(rune) {
-				configParser.state = postKey
-			} else if '=' == rune {
-				configParser.state = eqSeen
-			} else if unicode.IsDigit(rune) || unicode.IsLetter(rune) || '_' == rune {
-				configParser.keyBuffer.WriteRune(rune)
-			} else {
-				return nil, errors.New("Invalid input.")
-			}
-			break
-		case postKey:
-			if err == io.EOF {
-				return nil, errors.New("Unexpected end of input.")
-			} else if unicode.IsSpace(rune) {
-				// skip
-			} else if '=' == rune {
-				configParser.state = eqSeen
-			} else {
-				return nil, errors.New("Invalid input.")
-			}
-			break
-		case eqSeen:
-			if err == io.EOF {
-				key := configParser.keyBuffer.String()
-				value := configParser.valueBuffer.String()
-				dest[key] = value
-
-				configParser.state = done
-			} else if unicode.IsSpace(rune) {
-				// skip
-			} else if '\n' == rune {
-				key := configParser.keyBuffer.String()
-				value := configParser.valueBuffer.String()
-				dest[key] = value
-
-				configParser.keyBuffer.Truncate(0)
-				configParser.valueBuffer.Truncate(0)
-
-				configParser.state = initial
-			} else {
-				configParser.valueBuffer.WriteRune(rune)
-			}
-			break
-		case inValue:
-			if err == io.EOF {
-				key := configParser.keyBuffer.String()
-				value := configParser.valueBuffer.String()
-				dest[key] = value
-
-				configParser.state = done
-			} else if '\n' == rune {
-				key := configParser.keyBuffer.String()
-				value := configParser.valueBuffer.String()
-				dest[key] = value
-
-				configParser.keyBuffer.Truncate(0)
-				configParser.valueBuffer.Truncate(0)
-
-				configParser.state = initial
-			} else {
-				configParser.valueBuffer.WriteRune(rune)
-			}
-			break
-		case inComment:
-			if '\n' == rune {
-				configParser.state = inKey
-			}
-			break
-		case done:
-			return nil, errors.New("Invalid state.")
-		default:
-			return nil, errors.New("Invalid input.")
+		if err := configParser.handleInput(symbol, err); err != nil {
+			return nil, err
 		}
 	}
 
-	return dest, nil
+	return configParser.dest, nil
+}
+
+func (configParser *ConfigParser) handleInput(symbol rune, err error) error {
+	switch configParser.state {
+	case initial:
+		return configParser.handleInitial(symbol, err)
+	case inKey:
+		return configParser.handleInKey(symbol, err)
+	case postKey:
+		return configParser.handlePostKey(symbol, err)
+	case eqSeen:
+		return configParser.handleEqSeen(symbol, err)
+	case inValue:
+		return configParser.handleInValue(symbol, err)
+	case inComment:
+		return configParser.handleInValue(symbol, err)
+	case done:
+		return errors.New("Invalid state.")
+	default:
+		return errors.New("Invalid input.")
+	}
+
+	return errors.New("Invalid state.")
+}
+
+func (configParser *ConfigParser) handleInitial(symbol rune, err error) error {
+	if err == io.EOF {
+		configParser.state = done
+	} else if '#' == symbol {
+		configParser.state = inComment
+	} else if unicode.IsSpace(symbol) {
+		// skip
+	} else if unicode.IsLetter(symbol) || '_' == symbol {
+		configParser.keyBuffer.WriteRune(symbol)
+		configParser.state = inKey
+	} else {
+		return errors.New("Invalid input.")
+	}
+
+	return nil
+}
+
+func (configParser *ConfigParser) handleInKey(symbol rune, err error) error {
+	if err == io.EOF {
+		return errors.New("Unexpected end of input.")
+	} else if unicode.IsSpace(symbol) {
+		configParser.state = postKey
+	} else if '=' == symbol {
+		configParser.state = eqSeen
+	} else if unicode.IsDigit(symbol) || unicode.IsLetter(symbol) || '_' == symbol {
+		configParser.keyBuffer.WriteRune(symbol)
+	} else {
+		return errors.New("Invalid input.")
+	}
+
+	return nil
+}
+
+func (configParser *ConfigParser) handlePostKey(symbol rune, err error) error {
+
+	if err == io.EOF {
+		return errors.New("Unexpected end of input.")
+	} else if unicode.IsSpace(symbol) {
+		// skip
+	} else if '=' == symbol {
+		configParser.state = eqSeen
+	} else {
+		return errors.New("Invalid input.")
+	}
+	return nil
+}
+
+func (configParser *ConfigParser) handleEqSeen(symbol rune, err error) error {
+	if err == io.EOF {
+		configParser.addKeyValue()
+		configParser.state = done
+	} else if unicode.IsSpace(symbol) {
+		// skip
+	} else if '\n' == symbol {
+		configParser.addKeyValue()
+		configParser.state = initial
+	} else {
+		configParser.valueBuffer.WriteRune(symbol)
+	}
+
+	return nil
+}
+
+func (configParser *ConfigParser) handleInValue(symbol rune, err error) error {
+	if err == io.EOF {
+		configParser.addKeyValue()
+		configParser.state = done
+	} else if '\n' == symbol {
+		configParser.addKeyValue()
+		configParser.state = initial
+	} else {
+		configParser.valueBuffer.WriteRune(symbol)
+	}
+
+	return nil
+}
+
+func (configParser *ConfigParser) handleInComment(symbol rune, err error) error {
+	if '\n' == symbol {
+		configParser.state = inKey
+	} else {
+		// ok
+	}
+
+	return nil
+}
+
+func (configParser *ConfigParser) addKeyValue() {
+
+	key := configParser.keyBuffer.String()
+	value := configParser.valueBuffer.String()
+	if key != "" {
+		configParser.dest[key] = value
+	}
+	configParser.keyBuffer.Truncate(0)
+	configParser.valueBuffer.Truncate(0)
 }

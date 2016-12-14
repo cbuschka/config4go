@@ -53,6 +53,10 @@ func doIt() (*MyStruct, error) {
 }
 ```
 
+## Contributing
+
+Config4Go is an open source project, and contributions are welcome! Feel free to raise an issue or submit a pull request.
+
 ## License
 
 Copyright (c) 2016 by [Cornelius Buschka](https://github.com/cbuschka).

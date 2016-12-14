@@ -47,7 +47,7 @@ func doIt() (*MyStruct, error) {
 	    return nil, err
 	}
 
-	myStruct := &MyString{}
+	myStruct := &MyStruct{}
 	config.Fill(myStruct)
     return myStruct, nil
 }

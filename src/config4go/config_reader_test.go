@@ -31,6 +31,22 @@ import (
 	"testing"
 )
 
+func TestReadEmpty(t *testing.T) {
+	configReader := NewConfigReader()
+	in := bufio.NewReader(strings.NewReader(""))
+	config, err := configReader.ReadConfig(in)
+	if err != nil {
+		t.Error(err.Error())
+	}
+
+	dest := config.ToMap()
+
+	if len(dest) != 0 {
+		message := fmt.Sprintf("Dest is not of size 0, but %d, %s.", len(dest), dest)
+		t.Error(message)
+	}
+}
+
 func TestReadIntoWithNewlineAtEof(t *testing.T) {
 	configReader := NewConfigReader()
 	in := bufio.NewReader(strings.NewReader("# empty\nkey = value\n"))

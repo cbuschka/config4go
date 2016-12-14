@@ -2,6 +2,10 @@
 
 A simple config loader written in go.
 
+## Status
+
+Still a prototype.
+
 ## License
 
 Copyright (c) 2016 by [Cornelius Buschka](https://github.com/cbuschka).

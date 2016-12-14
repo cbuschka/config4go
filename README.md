@@ -6,6 +6,23 @@ A simple config loader written in go.
 
 Still a prototype.
 
+## Example
+
+### Load config as map:
+```
+import "github.com/cbuschka/config4go"
+
+func doIt() (map[string]string, error) {
+    configReader := NewConfigReader()
+	config, err := configReader.ReadConfigFromFile("example.conf")
+	if err != nil {
+	    return err
+	}
+	return config.ToMap()
+}
+```
+
+
 ## License
 
 Copyright (c) 2016 by [Cornelius Buschka](https://github.com/cbuschka).

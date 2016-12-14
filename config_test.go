@@ -25,12 +25,11 @@
 package config4go
 
 import (
-	"testing"
 	"bufio"
-	"strings"
 	"fmt"
+	"strings"
+	"testing"
 )
-
 
 func TestReadIntoWithNewlineAtEof(t *testing.T) {
 	dest := make(map[string]string)

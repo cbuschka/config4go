@@ -25,22 +25,22 @@
 package config4go
 
 import (
-	"os"
 	"bufio"
-	"unicode"
-	"errors"
 	"bytes"
+	"errors"
 	"io"
+	"os"
+	"unicode"
 )
 
 const (
-	initial = 0
-	in_key = 1
-	post_key = 2
-	eq_seen = 4
-	in_value = 3
+	initial    = 0
+	in_key     = 1
+	post_key   = 2
+	eq_seen    = 4
+	in_value   = 3
 	in_comment = 5
-	done = 11
+	done       = 11
 )
 
 func ReadFromFileInto(fileName string, dest map[string]string) error {
@@ -67,7 +67,7 @@ func ReadInto(in *bufio.Reader, dest map[string]string) error {
 
 		switch state {
 		case initial:
-			if( err == io.EOF ) {
+			if err == io.EOF {
 				state = done
 			} else if '#' == rune {
 				state = in_comment
@@ -81,20 +81,20 @@ func ReadInto(in *bufio.Reader, dest map[string]string) error {
 			}
 			break
 		case in_key:
-			if( err == io.EOF ) {
+			if err == io.EOF {
 				return errors.New("Unexpected end of input.")
 			} else if unicode.IsSpace(rune) {
 				state = post_key
 			} else if '=' == rune {
 				state = eq_seen
 			} else if unicode.IsDigit(rune) || unicode.IsLetter(rune) || '_' == rune {
-					keyBuffer.WriteRune(rune)
+				keyBuffer.WriteRune(rune)
 			} else {
 				return errors.New("Invalid input.")
 			}
 			break
 		case post_key:
-			if( err == io.EOF ) {
+			if err == io.EOF {
 				return errors.New("Unexpected end of input.")
 			} else if unicode.IsSpace(rune) {
 				// skip
@@ -105,7 +105,7 @@ func ReadInto(in *bufio.Reader, dest map[string]string) error {
 			}
 			break
 		case eq_seen:
-			if( err == io.EOF ) {
+			if err == io.EOF {
 				key := keyBuffer.String()
 				value := valueBuffer.String()
 				dest[key] = value
@@ -127,7 +127,7 @@ func ReadInto(in *bufio.Reader, dest map[string]string) error {
 			}
 			break
 		case in_value:
-			if( err == io.EOF ) {
+			if err == io.EOF {
 				key := keyBuffer.String()
 				value := valueBuffer.String()
 				dest[key] = value
@@ -151,7 +151,7 @@ func ReadInto(in *bufio.Reader, dest map[string]string) error {
 				state = in_key
 			}
 			break
-		case done :
+		case done:
 			return errors.New("Invalid state.")
 		default:
 			return errors.New("Invalid input.")

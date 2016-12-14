@@ -35,11 +35,11 @@ import (
 
 const (
 	initial    = 0
-	in_key     = 1
-	post_key   = 2
-	eq_seen    = 4
-	in_value   = 3
-	in_comment = 5
+	inKey = 1
+	postKey = 2
+	eqSeen = 4
+	inValue = 3
+	inComment = 5
 	done       = 11
 )
 
@@ -70,41 +70,41 @@ func ReadInto(in *bufio.Reader, dest map[string]string) error {
 			if err == io.EOF {
 				state = done
 			} else if '#' == rune {
-				state = in_comment
+				state = inComment
 			} else if unicode.IsSpace(rune) {
 				// skip
 			} else if unicode.IsLetter(rune) || '_' == rune {
 				keyBuffer.WriteRune(rune)
-				state = in_key
+				state = inKey
 			} else {
 				return errors.New("Invalid input.")
 			}
 			break
-		case in_key:
+		case inKey:
 			if err == io.EOF {
 				return errors.New("Unexpected end of input.")
 			} else if unicode.IsSpace(rune) {
-				state = post_key
+				state = postKey
 			} else if '=' == rune {
-				state = eq_seen
+				state = eqSeen
 			} else if unicode.IsDigit(rune) || unicode.IsLetter(rune) || '_' == rune {
 				keyBuffer.WriteRune(rune)
 			} else {
 				return errors.New("Invalid input.")
 			}
 			break
-		case post_key:
+		case postKey:
 			if err == io.EOF {
 				return errors.New("Unexpected end of input.")
 			} else if unicode.IsSpace(rune) {
 				// skip
 			} else if '=' == rune {
-				state = eq_seen
+				state = eqSeen
 			} else {
 				return errors.New("Invalid input.")
 			}
 			break
-		case eq_seen:
+		case eqSeen:
 			if err == io.EOF {
 				key := keyBuffer.String()
 				value := valueBuffer.String()
@@ -126,7 +126,7 @@ func ReadInto(in *bufio.Reader, dest map[string]string) error {
 				valueBuffer.WriteRune(rune)
 			}
 			break
-		case in_value:
+		case inValue:
 			if err == io.EOF {
 				key := keyBuffer.String()
 				value := valueBuffer.String()
@@ -146,9 +146,9 @@ func ReadInto(in *bufio.Reader, dest map[string]string) error {
 				valueBuffer.WriteRune(rune)
 			}
 			break
-		case in_comment:
+		case inComment:
 			if '\n' == rune {
-				state = in_key
+				state = inKey
 			}
 			break
 		case done:

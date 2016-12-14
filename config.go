@@ -25,10 +25,10 @@
 package config4go
 
 import (
-	"reflect"
-	"log"
-	"fmt"
 	"errors"
+	"fmt"
+	"log"
+	"reflect"
 	"strings"
 )
 

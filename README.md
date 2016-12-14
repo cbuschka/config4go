@@ -8,6 +8,16 @@ Still a prototype.
 
 ## Example
 
+### Config format:
+```
+# a comment
+key1 = value1
+
+key2=value2 # another comment
+
+#eof
+```
+
 ### Load config as map:
 ```
 import "github.com/cbuschka/config4go"

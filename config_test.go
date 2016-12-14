@@ -25,56 +25,30 @@
 package config4go
 
 import (
-	"reflect"
-	"log"
+	"bufio"
 	"fmt"
-	"errors"
 	"strings"
+	"testing"
 )
 
-// Config is a config read by ConfigReader.
-type Config struct {
-	valueMap map[string]string
+type Target struct {
+	Key string
 }
 
-// ToMap returns the config as a new map.
-func (config *Config) ToMap() map[string]string {
-	newMap := make(map[string]string)
-	for key, value := range config.valueMap {
-		newMap[key] = value
+func TestFill(t *testing.T) {
+	target := Target{}
+
+	configReader := NewConfigReader()
+	in := bufio.NewReader(strings.NewReader("key=value"))
+	config, err := configReader.ReadConfig(in)
+	if err != nil {
+		t.Error(err.Error())
 	}
 
-	return newMap
-}
+	config.Fill(&target)
 
-// Fill fills the target struct.
-func (config *Config) Fill(target interface{}) {
-
-	targetValue := reflect.ValueOf(target).Elem()
-
-	for key, value := range config.valueMap {
-		log.Printf("trying %s->%s\n", key, value)
-		setField(targetValue, key, value)
+	if target.Key != "value" {
+		message := fmt.Sprintf("Key is not 'value', but %s.", target.Key )
+		t.Error(message)
 	}
-}
-
-func setField(targetValue reflect.Value, name string, value interface{}) error {
-
-	targetFieldValue := targetValue.FieldByName(strings.Title(name))
-	if !targetFieldValue.IsValid() {
-		return fmt.Errorf("No such field: %s.", name)
-	}
-
-	if !targetFieldValue.CanSet() {
-		return fmt.Errorf("Cannot set value of %s.", name)
-	}
-
-	targetFieldType := targetFieldValue.Type()
-	val := reflect.ValueOf(value)
-	if targetFieldType != val.Type() {
-		return errors.New("Provided value type didn't match target field type.")
-	}
-
-	targetFieldValue.Set(val)
-	return nil
 }

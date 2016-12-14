@@ -6,7 +6,7 @@ A simple config loader written in go.
 
 Still a prototype.
 
-## Example
+## Examples
 
 ### Config format:
 ```
@@ -26,12 +26,32 @@ func doIt() (map[string]string, error) {
     configReader := NewConfigReader()
 	config, err := configReader.ReadConfigFromFile("example.conf")
 	if err != nil {
-	    return err
+	    return nil, err
 	}
-	return config.ToMap()
+	return config.ToMap(), nil
 }
 ```
 
+### Load config into struct:
+```
+import "github.com/cbuschka/config4go"
+
+type MyStruct struct {
+    Key string
+}
+
+func doIt() (*MyStruct, error) {
+    configReader := NewConfigReader()
+	config, err := configReader.ReadConfigFromFile("example.conf")
+	if err != nil {
+	    return nil, err
+	}
+
+	myStruct := &MyString{}
+	config.Fill(myStruct)
+    return myStruct, nil
+}
+```
 
 ## License
 

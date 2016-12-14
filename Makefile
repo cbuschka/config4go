@@ -1,3 +1,3 @@
 build:
 	mkdir -p ${PWD}/target/
-	GOPATH=${PWD} go test .
+	GOPATH=${PWD} go build . && go test .

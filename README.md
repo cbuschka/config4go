@@ -2,6 +2,11 @@
 
 A simple config loader written in go.
 
+## Features
+
+* Unicode support (uses go runes, not bytes)
+* Very efficient (implementation based on a state machine)
+
 ## Status
 
 Still a prototype.

@@ -43,6 +43,8 @@ const (
 	done       = 11
 )
 
+// Reads a config from file fileName into map dest. Returns error
+// in case of error.
 func ReadFromFileInto(fileName string, dest map[string]string) error {
 	file, err := os.Open(fileName)
 	defer file.Close()
@@ -54,6 +56,8 @@ func ReadFromFileInto(fileName string, dest map[string]string) error {
 	return ReadInto(in, dest)
 }
 
+// Reads a config from reader in into map dest. Returns error
+// in case of error.
 func ReadInto(in *bufio.Reader, dest map[string]string) error {
 	state := initial
 

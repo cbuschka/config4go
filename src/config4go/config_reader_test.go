@@ -32,11 +32,14 @@ import (
 )
 
 func TestReadIntoWithNewlineAtEof(t *testing.T) {
-	dest := make(map[string]string)
+	configReader := NewConfigReader()
 	in := bufio.NewReader(strings.NewReader("# empty\nkey = value\n"))
-	if err := ReadInto(in, dest); err != nil {
+	config, err := configReader.ReadConfig(in)
+	if err != nil {
 		t.Error(err.Error())
 	}
+
+	dest := config.ToMap()
 
 	if len(dest) != 1 {
 		message := fmt.Sprintf("Dest is not of size 1, but %d, %s.", len(dest), dest)
@@ -49,11 +52,14 @@ func TestReadIntoWithNewlineAtEof(t *testing.T) {
 }
 
 func TestReadIntoNoNewlineAtEof(t *testing.T) {
-	dest := make(map[string]string)
-	in := bufio.NewReader(strings.NewReader("# empty\nkey=value"))
-	if err := ReadInto(in, dest); err != nil {
+	configReader := NewConfigReader()
+	in := bufio.NewReader(strings.NewReader("# empty\nkey = value"))
+	config, err := configReader.ReadConfig(in)
+	if err != nil {
 		t.Error(err.Error())
 	}
+
+	dest := config.ToMap()
 
 	if len(dest) != 1 {
 		message := fmt.Sprintf("Dest is not of size 1, but %d, %s.", len(dest), dest)

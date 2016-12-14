@@ -29,138 +29,130 @@ import (
 	"bytes"
 	"errors"
 	"io"
-	"os"
 	"unicode"
 )
 
 const (
-	initial    = 0
-	inKey = 1
-	postKey = 2
-	eqSeen = 4
-	inValue = 3
+	initial   = 0
+	inKey     = 1
+	postKey   = 2
+	eqSeen    = 4
+	inValue   = 3
 	inComment = 5
-	done       = 11
+	done      = 11
 )
 
-// Reads a config from file fileName into map dest. Returns error
-// in case of error.
-func ReadFromFileInto(fileName string, dest map[string]string) error {
-	file, err := os.Open(fileName)
-	defer file.Close()
-	if err != nil {
-		return err
-	}
-
-	in := bufio.NewReader(file)
-	return ReadInto(in, dest)
+type ConfigParser struct {
+	state       int
+	keyBuffer   bytes.Buffer
+	valueBuffer bytes.Buffer
 }
 
 // Reads a config from reader in into map dest. Returns error
 // in case of error.
-func ReadInto(in *bufio.Reader, dest map[string]string) error {
-	state := initial
+func (configParser *ConfigParser) Parse(in *bufio.Reader) (map[string]string, error) {
+	dest := make(map[string]string)
 
-	var keyBuffer bytes.Buffer
-	var valueBuffer bytes.Buffer
-	for state != done {
+	configParser.state = initial
+
+	for configParser.state != done {
 		rune, _, err := in.ReadRune()
 		if err != nil && err != io.EOF {
-			return err
+			return nil, err
 		}
 
-		switch state {
+		switch configParser.state {
 		case initial:
 			if err == io.EOF {
-				state = done
+				configParser.state = done
 			} else if '#' == rune {
-				state = inComment
+				configParser.state = inComment
 			} else if unicode.IsSpace(rune) {
 				// skip
 			} else if unicode.IsLetter(rune) || '_' == rune {
-				keyBuffer.WriteRune(rune)
-				state = inKey
+				configParser.keyBuffer.WriteRune(rune)
+				configParser.state = inKey
 			} else {
-				return errors.New("Invalid input.")
+				return nil, errors.New("Invalid input.")
 			}
 			break
 		case inKey:
 			if err == io.EOF {
-				return errors.New("Unexpected end of input.")
+				return nil, errors.New("Unexpected end of input.")
 			} else if unicode.IsSpace(rune) {
-				state = postKey
+				configParser.state = postKey
 			} else if '=' == rune {
-				state = eqSeen
+				configParser.state = eqSeen
 			} else if unicode.IsDigit(rune) || unicode.IsLetter(rune) || '_' == rune {
-				keyBuffer.WriteRune(rune)
+				configParser.keyBuffer.WriteRune(rune)
 			} else {
-				return errors.New("Invalid input.")
+				return nil, errors.New("Invalid input.")
 			}
 			break
 		case postKey:
 			if err == io.EOF {
-				return errors.New("Unexpected end of input.")
+				return nil, errors.New("Unexpected end of input.")
 			} else if unicode.IsSpace(rune) {
 				// skip
 			} else if '=' == rune {
-				state = eqSeen
+				configParser.state = eqSeen
 			} else {
-				return errors.New("Invalid input.")
+				return nil, errors.New("Invalid input.")
 			}
 			break
 		case eqSeen:
 			if err == io.EOF {
-				key := keyBuffer.String()
-				value := valueBuffer.String()
+				key := configParser.keyBuffer.String()
+				value := configParser.valueBuffer.String()
 				dest[key] = value
 
-				state = done
+				configParser.state = done
 			} else if unicode.IsSpace(rune) {
 				// skip
 			} else if '\n' == rune {
-				key := keyBuffer.String()
-				value := valueBuffer.String()
+				key := configParser.keyBuffer.String()
+				value := configParser.valueBuffer.String()
 				dest[key] = value
 
-				keyBuffer.Truncate(0)
-				valueBuffer.Truncate(0)
+				configParser.keyBuffer.Truncate(0)
+				configParser.valueBuffer.Truncate(0)
 
-				state = initial
+				configParser.state = initial
 			} else {
-				valueBuffer.WriteRune(rune)
+				configParser.valueBuffer.WriteRune(rune)
 			}
 			break
 		case inValue:
 			if err == io.EOF {
-				key := keyBuffer.String()
-				value := valueBuffer.String()
+				key := configParser.keyBuffer.String()
+				value := configParser.valueBuffer.String()
 				dest[key] = value
 
-				state = done
+				configParser.state = done
 			} else if '\n' == rune {
-				key := keyBuffer.String()
-				value := valueBuffer.String()
+				key := configParser.keyBuffer.String()
+				value := configParser.valueBuffer.String()
 				dest[key] = value
 
-				keyBuffer.Truncate(0)
-				valueBuffer.Truncate(0)
+				configParser.keyBuffer.Truncate(0)
+				configParser.valueBuffer.Truncate(0)
 
-				state = initial
+				configParser.state = initial
 			} else {
-				valueBuffer.WriteRune(rune)
+				configParser.valueBuffer.WriteRune(rune)
 			}
 			break
 		case inComment:
 			if '\n' == rune {
-				state = inKey
+				configParser.state = inKey
 			}
 			break
 		case done:
-			return errors.New("Invalid state.")
+			return nil, errors.New("Invalid state.")
 		default:
-			return errors.New("Invalid input.")
+			return nil, errors.New("Invalid input.")
 		}
 	}
 
-	return nil
+	return dest, nil
 }

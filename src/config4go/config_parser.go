@@ -75,6 +75,7 @@ func (configParser *ConfigParser) Parse(in *bufio.Reader) (map[string]string, er
 }
 
 func (configParser *ConfigParser) handleInput(symbol rune, err error) error {
+
 	switch configParser.state {
 	case initial:
 		return configParser.handleInitial(symbol, err)
@@ -153,6 +154,7 @@ func (configParser *ConfigParser) handleEqSeen(symbol rune, err error) error {
 		configParser.state = initial
 	} else {
 		configParser.valueBuffer.WriteRune(symbol)
+		configParser.state = inValue
 	}
 
 	return nil
@@ -189,6 +191,6 @@ func (configParser *ConfigParser) addKeyValue() {
 	if key != "" {
 		configParser.dest[key] = value
 	}
-	configParser.keyBuffer.Truncate(0)
-	configParser.valueBuffer.Truncate(0)
+	configParser.keyBuffer.Reset()
+	configParser.valueBuffer.Reset()
 }

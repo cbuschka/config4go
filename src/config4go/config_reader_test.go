@@ -86,3 +86,27 @@ func TestReadIntoNoNewlineAtEof(t *testing.T) {
 		t.Error("Expected value of key to be 'value'.")
 	}
 }
+
+
+func TestReadMultipleKeyValues(t *testing.T) {
+	configReader := NewConfigReader()
+	in := bufio.NewReader(strings.NewReader("# empty\nkey1 = value1\nkey2=value2\n"))
+	config, err := configReader.ReadConfig(in)
+	if err != nil {
+		t.Error(err.Error())
+	}
+
+	dest := config.ToMap()
+
+	if len(dest) != 2 {
+		message := fmt.Sprintf("Dest is not of size 2, but %d, %s.", len(dest), dest)
+		t.Error(message)
+	}
+
+	if dest["key1"] != "value1" {
+		t.Error("Expected value of key1 to be 'value1'.")
+	}
+	if dest["key2"] != "value2" {
+		t.Error("Expected value of key2 to be 'value2'.")
+	}
+}

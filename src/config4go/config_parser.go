@@ -93,8 +93,6 @@ func (configParser *ConfigParser) handleInput(symbol rune, err error) error {
 	default:
 		return errors.New("Invalid input.")
 	}
-
-	return errors.New("Invalid state.")
 }
 
 func (configParser *ConfigParser) handleInitial(symbol rune, err error) error {

@@ -1,4 +1,4 @@
-# config [![Build Status](https://travis-ci.org/cbuschka/config4go.svg)](https://travis-ci.org/cbuschka/config4go)
+# config [![Build Status](https://travis-ci.org/cbuschka/config4go.svg)](https://travis-ci.org/cbuschka/config4go) [![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/hyperium/hyper/master/LICENSE)
 
 A simple config loader written in go.
 

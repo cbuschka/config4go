@@ -1,4 +1,4 @@
-# config
+# config [![Build Status](https://travis-ci.org/cbuschka/config4go.svg)](https://travis-ci.org/cbuschka/config4go)
 
 A simple config loader written in go.
 

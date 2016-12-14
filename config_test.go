@@ -39,7 +39,7 @@ func TestReadIntoWithNewlineAtEof(t *testing.T) {
 	}
 
 	if len(dest) != 1 {
-		message := fmt.Sprintf("Dest is not of size 1, but %s, %s.", len(dest), dest)
+		message := fmt.Sprintf("Dest is not of size 1, but %d, %s.", len(dest), dest)
 		t.Error(message)
 	}
 
@@ -56,7 +56,7 @@ func TestReadIntoNoNewlineAtEof(t *testing.T) {
 	}
 
 	if len(dest) != 1 {
-		message := fmt.Sprintf("Dest is not of size 1, but %s, %s.", len(dest), dest)
+		message := fmt.Sprintf("Dest is not of size 1, but %d, %s.", len(dest), dest)
 		t.Error(message)
 	}
 

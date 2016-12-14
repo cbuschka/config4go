@@ -87,7 +87,6 @@ func TestReadIntoNoNewlineAtEof(t *testing.T) {
 	}
 }
 
-
 func TestReadMultipleKeyValues(t *testing.T) {
 	configReader := NewConfigReader()
 	in := bufio.NewReader(strings.NewReader("# empty\nkey1 = value1\nkey2=value2\n"))

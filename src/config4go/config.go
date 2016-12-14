@@ -30,9 +30,9 @@ type Config struct {
 }
 
 // ToMap returns the config as a new map.
-func (this *Config) ToMap() map[string]string {
+func (config *Config) ToMap() map[string]string {
 	newMap := make(map[string]string)
-	for key, value := range this.valueMap {
+	for key, value := range config.valueMap {
 		newMap[key] = value
 	}
 

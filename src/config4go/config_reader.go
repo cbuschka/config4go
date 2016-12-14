@@ -29,9 +29,11 @@ import (
 	"os"
 )
 
+// ConfigReader is a factory for configs from a source.
 type ConfigReader struct {
 }
 
+// NewConfigReader creates a new ConfigReader.
 func NewConfigReader() *ConfigReader {
 	configReader := ConfigReader{}
 	return &configReader

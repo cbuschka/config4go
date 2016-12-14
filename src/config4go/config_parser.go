@@ -42,13 +42,14 @@ const (
 	done      = 11
 )
 
+// ConfigParser is a parser capable to parse config streams.
 type ConfigParser struct {
 	state       int
 	keyBuffer   bytes.Buffer
 	valueBuffer bytes.Buffer
 }
 
-// Reads a config from reader in into map dest. Returns error
+// Parse reads a config from reader in into map dest. Returns error
 // in case of error.
 func (configParser *ConfigParser) Parse(in *bufio.Reader) (map[string]string, error) {
 	dest := make(map[string]string)

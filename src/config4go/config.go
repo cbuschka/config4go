@@ -24,10 +24,12 @@
 
 package config4go
 
+// Config is a config read by ConfigReader.
 type Config struct {
 	valueMap map[string]string
 }
 
+// ToMap returns the config as a new map.
 func (this *Config) ToMap() map[string]string {
 	newMap := make(map[string]string)
 	for key, value := range this.valueMap {

@@ -8,3 +8,4 @@ test:
 
 coverage:
 	GOPATH=${PWD} go test -coverprofile=profile.out -covermode=atomic .
+	mv profile.out coverage.txt

@@ -1,3 +1,10 @@
+all:	build test
+
 build:
-	mkdir -p ${PWD}/target/
-	GOPATH=${PWD} go build . && go test .
+	GOPATH=${PWD} go build
+
+test:
+	GOPATH=${PWD} go test .
+
+coverage:
+	GOPATH=${PWD} go test -coverprofile=profile.out -covermode=atomic .

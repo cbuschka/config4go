@@ -1,11 +1,11 @@
-all:	build test
+all:	compile test
 
-build:
-	GOPATH=${PWD} go build
+compile:
+	go build
 
 test:
-	GOPATH=${PWD} go test .
+	go test .
 
 coverage:
-	GOPATH=${PWD} go test -coverprofile=profile.out -covermode=atomic .
+	go test -coverprofile=profile.out -covermode=atomic .
 	mv profile.out coverage.txt

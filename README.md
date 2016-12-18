@@ -37,27 +37,6 @@ func doIt() (map[string]string, error) {
 }
 ```
 
-### Load config into struct:
-```
-import "github.com/cbuschka/config4go"
-
-type MyStruct struct {
-    Key string
-}
-
-func doIt() (*MyStruct, error) {
-    configReader := NewConfigReader()
-	config, err := configReader.ReadConfigFromFile("example.conf")
-	if err != nil {
-	    return nil, err
-	}
-
-	myStruct := &MyStruct{}
-	config.Fill(myStruct)
-    return myStruct, nil
-}
-```
-
 ## Contributing
 
 Config4Go is an open source project, and contributions are welcome! Feel free to raise an issue or submit a pull request.

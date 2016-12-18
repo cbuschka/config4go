@@ -24,14 +24,6 @@
 
 package config4go
 
-import (
-	"errors"
-	"fmt"
-	"log"
-	"reflect"
-	"strings"
-)
-
 // Config is a config read by ConfigReader.
 type Config struct {
 	valueMap map[string]string
@@ -45,36 +37,4 @@ func (config *Config) ToMap() map[string]string {
 	}
 
 	return newMap
-}
-
-// Fill fills the target struct.
-func (config *Config) Fill(target interface{}) {
-
-	targetValue := reflect.ValueOf(target).Elem()
-
-	for key, value := range config.valueMap {
-		log.Printf("trying %s->%s\n", key, value)
-		setField(targetValue, key, value)
-	}
-}
-
-func setField(targetValue reflect.Value, name string, value interface{}) error {
-
-	targetFieldValue := targetValue.FieldByName(strings.Title(name))
-	if !targetFieldValue.IsValid() {
-		return fmt.Errorf("No such field: %s.", name)
-	}
-
-	if !targetFieldValue.CanSet() {
-		return fmt.Errorf("Cannot set value of %s.", name)
-	}
-
-	targetFieldType := targetFieldValue.Type()
-	val := reflect.ValueOf(value)
-	if targetFieldType != val.Type() {
-		return errors.New("Provided value type didn't match target field type.")
-	}
-
-	targetFieldValue.Set(val)
-	return nil
 }
